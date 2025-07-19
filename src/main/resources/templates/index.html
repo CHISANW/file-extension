@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 확장자 차단</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-item input {
+            margin-right: 5px;
+        }
+        
+        .custom-extensions {
+            margin-top: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .input-group button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .input-group button:hover {
+            background-color: #45a049;
+        }
+        
+        .extension-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .extension-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e9e9e9;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .extension-tag .remove-btn {
+            margin-left: 5px;
+            cursor: pointer;
+            color: #ff0000;
+            font-weight: bold;
+        }
+        
+        .counter {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .error-message {
+            color: #ff0000;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .input-group {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .input-group button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .input-group button.delete-all-btn {
+            padding: 8px 15px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .input-group button.delete-all-btn:hover {
+            background-color: #d32f2f;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .extension-tag .remove-btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 8px;
+            cursor: pointer;
+            color: #ff0000;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .extension-tag .remove-btn:hover {
+            background-color: rgba(255, 0, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        .default-buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .select-all-btn {
+            padding: 8px 15px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .select-all-btn:hover {
+            background-color: #0b7dda;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+
+        .deselect-all-btn {
+            padding: 8px 15px;
+            background-color: #9e9e9e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .deselect-all-btn:hover {
+            background-color: #7d7d7d;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                flex-wrap: wrap;
+            }
+            
+            .input-group input {
+                flex: 1 1 100%;
+                margin-bottom: 10px;
+            }
+            
+            .input-group button {
+                flex: 1 1 auto;
+                margin-left: 0;
+                margin-right: 10px;
+            }
+            
+            .input-group button:last-child {
+                margin-right: 0;
+            }
+            
+            .delete-all-btn {
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .input-group button {
+                flex: 1 1 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .input-group button:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        .extension-tester {
+            margin-top: 15px;
+        }
+        
+        .test-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-btn {
+            padding: 8px 15px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+            font-weight: normal;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-btn.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .tab-btn:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .test-tab-content {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-input {
+            display: none;
+        }
+        
+        .file-upload-label {
+            padding: 8px 15px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .file-upload-label:hover {
+            background-color: #0b7dda;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .selected-file-name {
+            margin-left: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .test-btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .test-btn:hover {
+            background-color: #45a049;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .test-result {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .result-header {
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .result-content {
+            padding: 15px;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .result-label {
+            font-weight: bold;
+            width: 80px;
+            flex-shrink: 0;
+        }
+        
+        .result-value {
+            flex: 1;
+        }
+        
+        .result-value.allowed {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .result-value.blocked {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>파일 확장자 차단</h1>
+        
+        <div class="section">
+            <div class="section-title">고정 확장자</div>
+            <div class="default-buttons-container">
+                <button id="selectAllExtensions" class="select-all-btn">전체 선택</button>
+                <button id="deselectAllExtensions" class="deselect-all-btn">전체 해제</button>
+            </div>
+            <div class="checkbox-group">
+                <div th:each="ext : ${defaultExtensions}" class="checkbox-item">
+                    <input type="checkbox" th:id="${ext.extension}" th:name="'block' + ${#strings.capitalize(ext.extension)}" th:checked="${ext.isActive}">
+                    <label th:for="${ext.extension}" th:text="${ext.extension}">extension</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">커스텀 확장자</div>
+            <div class="custom-extensions">
+                <div class="input-group">
+                    <input type="text" id="customExtension" placeholder="확장자 입력 (쉼표로 구분하여 여러 개 입력 가능)" maxlength="100">
+                    <button id="addExtension">추가</button>
+                    <button id="deleteAllExtensions" class="delete-all-btn">전체 삭제</button>
+                </div>
+                <div class="help-text">여러 확장자를 한 번에 추가하려면 쉼표(,)로 구분하세요. 예: jpg,png,gif</div>
+                <div id="errorMessage" class="error-message">최대 10개의 확장자만 추가할 수 있습니다.</div>
+                <div class="extension-tags" id="extensionTags">
+                    <!-- Custom extensions from server -->
+                    <div th:each="ext : ${customExtensions}" class="extension-tag">
+                        <span th:text="${ext.extension}">extension</span>
+                        <span class="remove-btn" th:data-extension="${ext.extension}" th:data-id="${ext.id}">x</span>
+                    </div>
+                </div>
+                <div class="counter">
+                    <span id="extensionCount" th:text="${customExtensionCount}">0</span>/10
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">파일 확장자 테스트</div>
+            <div class="extension-tester">
+                <div class="help-text">파일을 업로드하거나 파일명을 입력하여 확장자가 차단되는지 테스트해보세요.</div>
+                
+                <div class="test-tabs">
+                    <button id="uploadTabBtn" class="tab-btn active">파일 업로드</button>
+                    <button id="filenameTabBtn" class="tab-btn">파일명 입력</button>
+                </div>
+                
+                <div id="uploadTab" class="test-tab-content">
+                    <div class="file-upload-container">
+                        <input type="file" id="fileUpload" class="file-upload-input">
+                        <label for="fileUpload" class="file-upload-label">파일 선택</label>
+                        <span id="selectedFileName" class="selected-file-name"></span>
+                    </div>
+                    <button id="testUploadBtn" class="test-btn">테스트</button>
+                </div>
+                
+                <div id="filenameTab" class="test-tab-content" style="display: none;">
+                    <div class="input-group">
+                        <input type="text" id="filenameInput" placeholder="파일명 입력 (예: document.pdf)">
+                        <button id="testFilenameBtn" class="test-btn">테스트</button>
+                    </div>
+                </div>
+                
+                <div id="testResult" class="test-result" style="display: none;">
+                    <div class="result-header">테스트 결과</div>
+                    <div class="result-content">
+                        <div class="result-item">
+                            <span class="result-label">파일명:</span>
+                            <span id="resultFilename" class="result-value"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">확장자:</span>
+                            <span id="resultExtension" class="result-value"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">상태:</span>
+                            <span id="resultStatus" class="result-value"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">설명:</span>
+                            <span id="resultDescription" class="result-value"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addButton = document.getElementById('addExtension');
+            const extensionInput = document.getElementById('customExtension');
+            const extensionTags = document.getElementById('extensionTags');
+            const extensionCount = document.getElementById('extensionCount');
+            const errorMessage = document.getElementById('errorMessage');
+            const deleteAllButton = document.getElementById('deleteAllExtensions');
+            const selectAllButton = document.getElementById('selectAllExtensions');
+            const deselectAllButton = document.getElementById('deselectAllExtensions');
+
+            let customExtensions = [];
+            let defaultExtensions = [];
+
+            document.querySelectorAll('.extension-tag').forEach(tag => {
+                const extension = tag.querySelector('span:first-child').textContent;
+                customExtensions.push(extension);
+            });
+
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
+                defaultExtensions.push(checkbox.id);
+            });
+            
+            const MAX_EXTENSIONS = 10;
+
+            addButton.addEventListener('click', function() {
+                addExtension();
+            });
+
+            extensionInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addExtension();
+                }
+            });
+
+            deleteAllButton.addEventListener('click', function() {
+                if(customExtensions.length === 0) {
+                    alert('삭제할 확장자가 없습니다.');
+                    return;
+                }
+
+                if(!confirm('모든 커스텀 확장자를 삭제하시겠습니까?')){
+                    return;
+                }
+
+                const extensionElements = document.querySelectorAll('.extension-tag');
+                const deletePromises = [];
+
+                extensionElements.forEach(element => {
+                    const removeBtn = element.querySelector('.remove-btn');
+                    const id = removeBtn.getAttribute('data-id');
+
+                    if (!id) {
+                        console.error('No ID found for extension');
+                        return;
+                    }
+
+                    const deletePromise = fetch(`/api/extensions/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    deletePromises.push(deletePromise);
+                });
+
+                Promise.all(deletePromises)
+                    .then(responses => {
+                        const allSuccessful = responses.every(response => response.ok);
+
+                        if (!allSuccessful) {
+                            throw new Error('Some extensions could not be deleted');
+                        }
+
+                        customExtensions = [];
+
+                        while (extensionTags.firstChild) {
+                            extensionTags.removeChild(extensionTags.firstChild);
+                        }
+
+                        extensionCount.textContent = '0';
+
+                        errorMessage.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('일부 확장자 삭제에 실패했습니다.');
+                    });
+            })
+
+            function addExtension() {
+                const input = extensionInput.value.trim().toLowerCase();
+
+                if (input === '') {
+                    alert('빈칸은 등록할수 없습니다.');
+                    return;
+                }
+
+                const extensionsToAdd = input.split(',')
+                    .map(ext => ext.trim())
+                    .filter(ext => ext !== '');
+                
+                if (extensionsToAdd.length === 0) {
+                    alert('유효한 확장자를 입력해주세요.');
+                    return;
+                }
+
+                if (customExtensions.length >= MAX_EXTENSIONS) {
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                if (customExtensions.length + extensionsToAdd.length > MAX_EXTENSIONS) {
+                    const remainingSlots = MAX_EXTENSIONS - customExtensions.length;
+                    alert(`최대 ${MAX_EXTENSIONS}개의 확장자만 추가할 수 있습니다. 현재 ${remainingSlots}개만 추가 가능합니다.`);
+                    return;
+                }
+
+                const validExtensions = [];
+                const invalidExtensions = [];
+                const duplicateExtensions = [];
+                const defaultDuplicates = [];
+
+                for (const extension of extensionsToAdd) {
+                    if (validExtensions.includes(extension)) {
+                        duplicateExtensions.push(extension);
+                        continue;
+                    }
+
+                    if (customExtensions.includes(extension)) {
+                        duplicateExtensions.push(extension);
+                        continue;
+                    }
+
+                    if (defaultExtensions.includes(extension)) {
+                        defaultDuplicates.push(extension);
+                        continue;
+                    }
+
+                    const validExtensionPattern = /^[a-z0-9]+$/;
+                    if (!validExtensionPattern.test(extension)) {
+                        invalidExtensions.push(extension);
+                        continue;
+                    }
+
+                    validExtensions.push(extension);
+                }
+
+                if (invalidExtensions.length > 0) {
+                    alert(`다음 확장자는 특수문자를 포함하고 있어 추가할 수 없습니다: ${invalidExtensions.join(', ')}`);
+                }
+                
+                if (duplicateExtensions.length > 0) {
+                    alert(`다음 확장자는 이미 추가되어 있습니다: ${duplicateExtensions.join(', ')}`);
+                }
+                
+                if (defaultDuplicates.length > 0) {
+                    alert(`다음 확장자는 기본 확장자이므로 추가할 수 없습니다: ${defaultDuplicates.join(', ')}`);
+                }
+
+                if (validExtensions.length === 0) {
+                    return;
+                }
+
+                processValidExtensions(validExtensions);
+
+                extensionInput.value = '';
+            }
+
+            function processValidExtensions(validExtensions) {
+                const successfulExtensions = [];
+                const failedExtensions = [];
+                const promises = [];
+
+                validExtensions.forEach(extension => {
+                    const promise = fetch('/api/extensions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ extension: extension, isDefault: false })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Failed to add extension: ${extension}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        customExtensions.push(extension);
+                        successfulExtensions.push({ extension, id: data.id });
+
+                        const tag = document.createElement('div');
+                        tag.className = 'extension-tag';
+                        tag.innerHTML = `
+                            <span>${extension}</span>
+                            <span class="remove-btn" data-extension="${extension}" data-id="${data.id}">x</span>
+                        `;
+
+                        extensionTags.appendChild(tag);
+
+                        extensionCount.textContent = customExtensions.length;
+
+                        errorMessage.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        failedExtensions.push(extension);
+                    });
+                    
+                    promises.push(promise);
+                });
+
+                Promise.all(promises.map(p => p.catch(e => e)))
+                    .then(() => {
+                        if (successfulExtensions.length > 0) {
+                            if (validExtensions.length === 1) {
+                            } else {
+                                alert(`${successfulExtensions.length}개의 확장자가 성공적으로 추가되었습니다.`);
+                            }
+                        }
+                        
+                        if (failedExtensions.length > 0) {
+                            alert(`다음 확장자 추가에 실패했습니다: ${failedExtensions.join(', ')}`);
+                        }
+                    });
+            }
+
+            extensionTags.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-btn')) {
+                    const extension = e.target.getAttribute('data-extension');
+                    const id = e.target.getAttribute('data-id');
+                    
+                    if (!id) {
+                        console.error('No ID found for extension:', extension);
+                        return;
+                    }
+
+                    fetch(`/api/extensions/${id}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to delete extension');
+                        }
+
+                        const index = customExtensions.indexOf(extension);
+                        if (index > -1) {
+                            customExtensions.splice(index, 1);
+                        }
+
+                        e.target.parentElement.remove();
+
+                        extensionCount.textContent = customExtensions.length;
+
+                        errorMessage.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('확장자 삭제에 실패했습니다.');
+                    });
+                }
+            });
+
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const extension = this.id;
+                    const isActive = this.checked;
+                    updateExtensionStatus(extension, isActive, this);
+                });
+            });
+
+            function updateExtensionStatus(extension, isActive, checkboxElement) {
+                return fetch(`/api/extensions/default/${extension}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ isActive: isActive })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update extension status');
+                    }
+                    return response;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('확장자 상태 업데이트에 실패했습니다.');
+                    if (checkboxElement) {
+                        checkboxElement.checked = !isActive;
+                    }
+                    throw error;
+                });
+            }
+
+            selectAllButton.addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('.checkbox-item input[type="checkbox"]');
+                const updatePromises = [];
+                let updatedCount = 0;
+                
+                checkboxes.forEach(checkbox => {
+                    if (!checkbox.checked) {
+                        checkbox.checked = true;
+                        updatedCount++;
+                        updatePromises.push(updateExtensionStatus(checkbox.id, true));
+                    }
+                });
+                
+                if (updatePromises.length === 0) {
+                    alert('이미 모든 고정 확장자가 선택되어 있습니다.');
+                    return;
+                }
+
+                selectAllButton.disabled = true;
+                selectAllButton.textContent = '처리 중...';
+                
+                Promise.all(updatePromises)
+                    .then(() => {
+                        alert(`${updatedCount}개의 고정 확장자가 선택되었습니다.`);
+                    })
+                    .catch(error => {
+                        console.error('Error in batch update:', error);
+                    })
+                    .finally(() => {
+                        selectAllButton.disabled = false;
+                        selectAllButton.textContent = '전체 선택';
+                    });
+            });
+
+            deselectAllButton.addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('.checkbox-item input[type="checkbox"]');
+                const updatePromises = [];
+                let updatedCount = 0;
+                
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        checkbox.checked = false;
+                        updatedCount++;
+                        updatePromises.push(updateExtensionStatus(checkbox.id, false));
+                    }
+                });
+                
+                if (updatePromises.length === 0) {
+                    alert('이미 모든 고정 확장자가 해제되어 있습니다.');
+                    return;
+                }
+
+                deselectAllButton.disabled = true;
+                deselectAllButton.textContent = '처리 중...';
+                
+                Promise.all(updatePromises)
+                    .then(() => {
+                        alert(`${updatedCount}개의 고정 확장자가 해제되었습니다.`);
+                    })
+                    .catch(error => {
+                        console.error('Error in batch update:', error);
+                    })
+                    .finally(() => {
+                        deselectAllButton.disabled = false;
+                        deselectAllButton.textContent = '전체 해제';
+                    });
+            });
+
+            const uploadTabBtn = document.getElementById('uploadTabBtn');
+            const filenameTabBtn = document.getElementById('filenameTabBtn');
+            const uploadTab = document.getElementById('uploadTab');
+            const filenameTab = document.getElementById('filenameTab');
+            const fileUpload = document.getElementById('fileUpload');
+            const selectedFileName = document.getElementById('selectedFileName');
+            const testUploadBtn = document.getElementById('testUploadBtn');
+            const filenameInput = document.getElementById('filenameInput');
+            const testFilenameBtn = document.getElementById('testFilenameBtn');
+            const testResult = document.getElementById('testResult');
+            const resultFilename = document.getElementById('resultFilename');
+            const resultExtension = document.getElementById('resultExtension');
+            const resultStatus = document.getElementById('resultStatus');
+            const resultDescription = document.getElementById('resultDescription');
+
+            uploadTabBtn.addEventListener('click', function() {
+                uploadTabBtn.classList.add('active');
+                filenameTabBtn.classList.remove('active');
+                uploadTab.style.display = 'block';
+                filenameTab.style.display = 'none';
+            });
+            
+            filenameTabBtn.addEventListener('click', function() {
+                filenameTabBtn.classList.add('active');
+                uploadTabBtn.classList.remove('active');
+                filenameTab.style.display = 'block';
+                uploadTab.style.display = 'none';
+            });
+
+            fileUpload.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    selectedFileName.textContent = this.files[0].name;
+                } else {
+                    selectedFileName.textContent = '';
+                }
+            });
+
+            testUploadBtn.addEventListener('click', function() {
+                if (!fileUpload.files || fileUpload.files.length === 0) {
+                    alert('파일을 선택해주세요.');
+                    return;
+                }
+                
+                const filename = fileUpload.files[0].name;
+                testFileExtension(filename);
+            });
+
+            testFilenameBtn.addEventListener('click', function() {
+                const filename = filenameInput.value.trim();
+                
+                if (!filename) {
+                    alert('파일명을 입력해주세요.');
+                    return;
+                }
+                
+                testFileExtension(filename);
+            });
+
+            function testFileExtension(filename) {
+                const lastDotIndex = filename.lastIndexOf('.');
+                
+                if (lastDotIndex === -1 || lastDotIndex === filename.length - 1) {
+                    showResult(filename, '', false, '확장자가 없는 파일입니다.');
+                    return;
+                }
+                
+                const extension = filename.substring(lastDotIndex + 1).toLowerCase();
+
+                const isInDefaultExtensions = defaultExtensions.includes(extension);
+                const isDefaultActive = isInDefaultExtensions && 
+                    document.getElementById(extension) && 
+                    document.getElementById(extension).checked;
+
+                const isInCustomExtensions = customExtensions.includes(extension);
+
+                const isBlocked = isDefaultActive || isInCustomExtensions;
+
+                let description = '';
+                
+                if (isBlocked) {
+                    if (isDefaultActive) {
+                        description = `'${extension}' 확장자는 고정 확장자로 차단되어 있습니다.`;
+                    } else if (isInCustomExtensions) {
+                        description = `'${extension}' 확장자는 커스텀 확장자로 차단되어 있습니다.`;
+                    }
+                } else {
+                    if (isInDefaultExtensions && !isDefaultActive) {
+                        description = `'${extension}' 확장자는 고정 확장자이지만 현재 활성화되어 있지 않습니다.`;
+                    } else {
+                        description = `'${extension}' 확장자는 차단 목록에 없습니다.`;
+                    }
+                }
+
+                showResult(filename, extension, isBlocked, description);
+            }
+
+            function showResult(filename, extension, isBlocked, description) {
+                resultFilename.textContent = filename;
+                resultExtension.textContent = extension || '없음';
+                resultStatus.textContent = isBlocked ? '차단됨' : '허용됨';
+                resultStatus.className = 'result-value ' + (isBlocked ? 'blocked' : 'allowed');
+                resultDescription.textContent = description;
+                testResult.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
