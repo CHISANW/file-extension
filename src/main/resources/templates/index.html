@@ -425,7 +425,7 @@
                     <button id="deleteAllExtensions" class="delete-all-btn">전체 삭제</button>
                 </div>
                 <div class="help-text">여러 확장자를 한 번에 추가하려면 쉼표(,)로 구분하세요. 예: jpg,png,gif</div>
-                <div id="errorMessage" class="error-message">최대 10개의 확장자만 추가할 수 있습니다.</div>
+                <div id="errorMessage" class="error-message">최대 200개의 확장자만 추가할 수 있습니다.</div>
                 <div class="extension-tags" id="extensionTags">
                     <!-- Custom extensions from server -->
                     <div th:each="ext : ${customExtensions}" class="extension-tag">
@@ -434,7 +434,7 @@
                     </div>
                 </div>
                 <div class="counter">
-                    <span id="extensionCount" th:text="${customExtensionCount}">0</span>/10
+                    <span id="extensionCount" th:text="${customExtensionCount}">0</span>/200
                 </div>
             </div>
         </div>
