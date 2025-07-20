@@ -660,6 +660,7 @@
             function processValidExtensions(validExtensions) {
                 const successfulExtensions = [];
                 const failedExtensions = [];
+                const lengthLimitFailedExtensions = [];
                 const promises = [];
 
                 validExtensions.forEach(extension => {
@@ -670,51 +671,55 @@
                         },
                         body: JSON.stringify({ extension: extension, isDefault: false })
                     })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Failed to add extension: ${extension}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        customExtensions.push(extension);
-                        successfulExtensions.push({ extension, id: data.id });
+                        .then(async response => {
+                            if (!response.ok) {
+                                const data = await response.json();
+                                if (data.message === '20글자 이상은 추가 할 수 없습니다.') {
+                                    lengthLimitFailedExtensions.push(extension);
+                                    throw new Error(`길이 초과: ${extension}`);
+                                } else {
+                                    failedExtensions.push(extension);
+                                    throw new Error(`추가 실패: ${extension} (${data.message})`);
+                                }
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            successfulExtensions.push({ extension, id: data.id });
+                            customExtensions.push(extension);
 
-                        const tag = document.createElement('div');
-                        tag.className = 'extension-tag';
-                        tag.innerHTML = `
-                            <span>${extension}</span>
-                            <span class="remove-btn" data-extension="${extension}" data-id="${data.id}">x</span>
-                        `;
+                            const tag = document.createElement('div');
+                            tag.className = 'extension-tag';
+                            tag.innerHTML = `
+                                <span>${extension}</span>
+                                <span class="remove-btn" data-extension="${extension}" data-id="${data.id}">x</span>
+                            `;
+                            extensionTags.appendChild(tag);
+                            extensionCount.textContent = customExtensions.length;
+                            errorMessage.style.display = 'none';
+                        })
+                        .catch(error => {
+                        });
 
-                        extensionTags.appendChild(tag);
-
-                        extensionCount.textContent = customExtensions.length;
-
-                        errorMessage.style.display = 'none';
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        failedExtensions.push(extension);
-                    });
-                    
                     promises.push(promise);
                 });
 
                 Promise.all(promises.map(p => p.catch(e => e)))
                     .then(() => {
-                        if (successfulExtensions.length > 0) {
-                            if (validExtensions.length === 1) {
-                            } else {
-                                alert(`${successfulExtensions.length}개의 확장자가 성공적으로 추가되었습니다.`);
-                            }
+                        if (successfulExtensions.length > 0 && validExtensions.length > 1) {
+                            alert(`${successfulExtensions.length}개의 확장자가 성공적으로 추가되었습니다.`);
                         }
-                        
+
                         if (failedExtensions.length > 0) {
                             alert(`다음 확장자 추가에 실패했습니다: ${failedExtensions.join(', ')}`);
                         }
+
+                        if (lengthLimitFailedExtensions.length > 0) {
+                            alert(`확장자의 최대 길이는 20글자 입니다: ${lengthLimitFailedExtensions.join(', ')}`);
+                        }
                     });
             }
+
 
             extensionTags.addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-btn')) {
