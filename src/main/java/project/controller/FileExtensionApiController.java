@@ -1,6 +1,7 @@
 package project.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class FileExtensionApiController {
 
     @PutMapping("/default/{extension}")
     public ResponseEntity<FileExtensionDto> updateFileExtensionStatus(
-            @PathVariable String extension,
+            @PathVariable @Size(max = 20) String extension,
             @Valid @RequestBody UpdateFileRequestDto body) {
         FileExtensionDto updatedExtension = fileExtensionService.updateFileExtensionStatus(extension, body.isActive());
         return ResponseEntity.ok(updatedExtension);
