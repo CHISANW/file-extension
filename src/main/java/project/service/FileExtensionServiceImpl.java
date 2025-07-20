@@ -51,6 +51,9 @@ public class FileExtensionServiceImpl implements FileExtensionService{
     
     @Override
     public FileExtensionDto createFileExtension(FileRequestDto.CreateFileRequestDto body) {
+        fileExtensionRepository.findByExtension(body.getExtension()).ifPresent(e -> {
+            throw new FileExtensionException(ErrorCode.ALREADY);
+        });
         FileExtension fileExtension = fileExtensionRepository.save(FileExtension.createOf(body));
         return FileExtensionDto.toEntity(fileExtension);
     }
