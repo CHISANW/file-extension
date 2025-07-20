@@ -15,7 +15,7 @@ public class FileRequestDto {
     @Getter
     public static class CreateFileRequestDto {
         @NotBlank
-        @Size(max = 20)
+        @Size(max = 20,message = "20글자 이상은 추가 할 수 없습니다.")
         private String extension;
 
         private boolean isDefault;
